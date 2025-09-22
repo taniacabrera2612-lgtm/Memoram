@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memorama Sistemas Operativos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #eef;
+    }
+    h1 {
+      color: #333;
+    }
+    .tablero {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .carta {
+      width: 100px;
+      height: 100px;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .carta img {
+      max-width: 80%;
+      display: none; /* al inicio las imágenes están ocultas */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Memorama de Sistemas Operativos</h1>
+  <p>Haz clic en dos cartas para encontrar la pareja.</p>
+
+  <div class="tablero" id="tablero"></div>
+
+  <script>
+    // imágenes (2 de cada una para formar las parejas)
+    const imagenes = [
+      "https://upload.wikimedia.org/wikipedia/commons/5/5f/Windows_logo_-_2021.svg",
+      "https://upload.wikimedia.org/wikipedia/commons/3/3e/MacOS_logo.svg",
+      "https://upload.wikimedia.org/wikipedia/commons/3/3e/Tux_Mono.svg",
+      "https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg"
+    ];
+
+    // duplicar las imágenes y mezclarlas
+    let cartas = [...imagenes, ...imagenes];
+    cartas.sort(() => Math.random() - 0.5);
+
+    const tablero = document.getElementById("tablero");
+    let seleccionadas = [];
+    let bloqueado = false;
+
+    // crear las cartas
+    cartas.forEach((src, index) => {
+      let carta = document.createElement("div");
+      carta.classList.add("carta");
+
+      let img = document.createElement("img");
+      img.src = src;
+
+      carta.appendChild(img);
+      carta.addEventListener("click", () => voltearCarta(carta, src));
+
+      tablero.appendChild(carta);
+    });
+
+    function voltearCarta(carta, src) {
+      if (bloqueado) return;
+      let img = carta.querySelector("img");
+      if (img.style.display === "block") return; // ya está descubierta
+
+      img.style.display = "block";
+      seleccionadas.push({carta, src});
+
+      if (seleccionadas.length === 2) {
+        if (seleccionadas[0].src === seleccionadas[1].src) {
+          seleccionadas = []; // son iguales, se quedan
+        } else {
+          bloqueado = true;
+          setTimeout(() => {
+            seleccionadas[0].carta.querySelector("img").style.display = "none";
+            seleccionadas[1].carta.querySelector("img").style.display = "none";
+            seleccionadas = [];
+            bloqueado = false;
+          }, 1000);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>

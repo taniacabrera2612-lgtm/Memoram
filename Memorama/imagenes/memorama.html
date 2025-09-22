@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Memorama - Sistemas Operativos (Local)</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: lightpink; }
+    h1 { color: #222; }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      gap: 12px;
+      justify-content: center;
+      margin: 20px auto;
+      width: max-content;
+    }
+    .card {
+      width: 120px; height: 120px;
+      background: yellow; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .card img { max-width: 90%; max-height: 90%; display: none; }
+    .card .label {
+      position: absolute; color: blue; font-weight: bold;
+      display: none; padding: 6px; text-align:center;
+    }
+    .card.flipped img { display: block; }
+    .card.flipped .label { display: none; }
+    .card.noimg { background: #5a5a5a; }
+    #info { margin-top: 12px; color:#444 }
+  </style>
+</head>
+<body>
+
+  <h1>Memorama: Sistemas Operativos (8 pares)</h1>
+  <p>¡JUEGA!</p>
+
+  <div id="board"></div>
+  <div id="info">Movimientos: <span id="moves">0</span> • Parejas: <span id="pairs">0</span>/8</div>
+
+<script>
+    const images = [
+    {src: "windows.png", label: "Windows"},
+    {src: "mac.png",     label: "macOS"},
+    {src: "linux.png",   label: "Linux"},
+    {src: "android.png", label: "Android"},
+    {src: "ubuntu.png",  label: "Ubuntu"},
+    {src: "fedora.png",  label: "Fedora"},
+    {src: "freebsd.png", label: "FreeBSD"},
+    {src: "redhat.png",  label: "Red Hat"}
+  ];
+
+    let deck = images.concat(images).map(item => ({...item})); // copiar objetos
+    function shuffle(a){
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  shuffle(deck);
+
+  const board = document.getElementById("board");
+  const movesEl = document.getElementById("moves");
+  const pairsEl = document.getElementById("pairs");
+
+  let first = null;
+  let lock = false;
+  let moves = 0;
+  let pairs = 0;
+
+  
+  deck.forEach((cardData, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.dataset.idx = idx;
+
+    const img = document.createElement("img");
+    img.src = cardData.src;
+    img.alt = cardData.label;
+
+    
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = cardData.label;
+
+        img.onerror = function(){
+      img.style.display = "none";
+      label.style.display = "block";
+      card.classList.add("noimg");
+    };
+
+    card.appendChild(img);
+    card.appendChild(label);
+
+    
+    card.addEventListener("click", () => flip(card, cardData.src, label));
+    card.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(card, cardData.src, label); }
+    });
+
+    board.appendChild(card);
+  });
+
+  function flip(card, src, label){
+    if(lock) return;
+    if(card.classList.contains("flipped")) return;
+
+    card.classList.add("flipped");
+
+    if(!first){
+      first = {card, src};
+      return;
+    }
+
+        moves++;
+    movesEl.textContent = moves;
+    const second = {card, src};
+
+    if(first.src === second.src){
+            pairs++;
+      pairsEl.textContent = pairs;
+      first = null;
+                  if(pairs === images.length){
+        setTimeout(()=> alert("¡Felicidades! Terminaste en " + moves + " movimientos."), 200);
+      }
+    } else {
+      
+      lock = true;
+      setTimeout(() => {
+        first.card.classList.remove("flipped");
+        second.card.classList.remove("flipped");
+        first = null;
+        lock = false;
+      }, 900);
+    }
+  }
+</script>
+
+</body>
+</html>
